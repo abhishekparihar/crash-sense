@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Crash Sense</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">&#8226; Hello world!</string>
+    <string name="text">The USA Football Rules book standardizes on-field playing rules for youth football. The book reflects the beliefs of USA Football, including : \n\n\t &#8226; Sportsmanship \n\t &#8226; Participation</string>
+    
+
+</resources>
+ 
