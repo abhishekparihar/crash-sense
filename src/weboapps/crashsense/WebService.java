@@ -45,13 +45,14 @@ public class WebService {
 	private String webServiceUrl;
 
 	public WebService(String serviceName) {
+		
 		HttpParams myParams = new BasicHttpParams();
-
 		HttpConnectionParams.setConnectionTimeout(myParams, 20000);
 		HttpConnectionParams.setSoTimeout(myParams, 20000);
 		httpClient = new DefaultHttpClient(myParams);
 		localContext = new BasicHttpContext();
 		webServiceUrl = serviceName;
+		Log.v("web",""+webServiceUrl);
 	}
 
 	public String webInvoke(String methodName, Map<String, Object> params) {
@@ -111,7 +112,8 @@ public class WebService {
 		
 
 		httpPost = new HttpPost(postUrl);
-		
+		Log.v("web",""+webServiceUrl);
+		Log.v("web",""+httpPost);
 
 		try {
 			httpPost.setEntity(new UrlEncodedFormEntity(params));
@@ -120,6 +122,7 @@ public class WebService {
 
 		try {
 			response = httpClient.execute(httpPost);
+			Log.v("web",""+response);
 		} catch (Exception e) {
 			if (e.getMessage() != null) {
 			} else {
@@ -128,6 +131,7 @@ public class WebService {
 
 		try {
 			ret = EntityUtils.toString(response.getEntity());
+			Log.v("web",ret);
 		} catch (Exception e) {
 			if (e.getMessage() != null) {
 			} else {

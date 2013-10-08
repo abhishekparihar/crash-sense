@@ -16,99 +16,94 @@ import android.content.Context;
 import android.util.Log;
 
 public class MyApplication extends Application {
-	
+
 	private UncaughtExceptionHandler defaultUEH;
-	private final static String TAG=GetField.class.getName();
-	 public MainActivity mContext;
-	 @Override
+	private final static String TAG = GetField.class.getName();
+
+	@Override
 	public void onCreate() {
-		super.onCreate();	
-		Log.v(TAG,"myapp");
+		super.onCreate();
+		Log.v(TAG, "myapp");
 	}
-	 public void setContext(MainActivity mActivity)
-	 {
-		 mContext=mActivity;
-	 }
-	 
-	 private Thread.UncaughtExceptionHandler uncaughtExceptionHandler = new Thread.UncaughtExceptionHandler() {
-		
+
+	private Thread.UncaughtExceptionHandler uncaughtExceptionHandler = new Thread.UncaughtExceptionHandler() {
+
 		@Override
 		public void uncaughtException(Thread thread, Throwable ex) {
 			Log.v("Crash Sense", ex.getMessage());
 			Log.v("Crash Sense localazied messgae", ex.getLocalizedMessage());
-			//Log.v("Crash Sense stack trace", ex.getStackTrace().);
+			// Log.v("Crash Sense stack trace", ex.getStackTrace().);
 			StringWriter sw = new StringWriter();
-			
+
 			PrintWriter pw = new PrintWriter(sw);
-			
+
 			ex.printStackTrace(pw);
-			
+
 			Log.v("Crash Sense", sw.toString());
-			
+
 			String[] params = new String[3];
 			params[0] = ex.getClass().toString();
-			
 			params[1] = ex.getMessage();
-			
 			params[2] = sw.toString();
-			
-			DataOperations dataOperations= new DataOperations(mContext);
+
+			DataOperations dataOperations = new DataOperations(getApplicationContext());
 			dataOperations.insertIntoTable(params);
-			
+
 			new SendLogTask().execute(params);
-			
+
 			writeToFile(sw.toString());
 			defaultUEH.uncaughtException(thread, ex);
-			
+
 		}
 	};
-	
-	public MyApplication() {
-        defaultUEH = Thread.getDefaultUncaughtExceptionHandler();
 
-        // setup handler for uncaught exception 
-        Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
-    }
-	
-	private void writeToFile(String data) {
-	    try {
-	        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput("errorReport.txt", Context.MODE_PRIVATE));
-	        outputStreamWriter.write(data);
-	        outputStreamWriter.append(data);
-	        outputStreamWriter.close();
-	    }
-	    catch (IOException e) {
-	        Log.i("Exception", "File write failed: " + e.toString());
-	    } 
+	public MyApplication() {
+		defaultUEH = Thread.getDefaultUncaughtExceptionHandler();
+
+		// setup handler for uncaught exception
+		Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
 	}
-	
+
+	private void writeToFile(String data) {
+		try {
+			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
+					openFileOutput("errorReport.txt", Context.MODE_PRIVATE));
+			outputStreamWriter.write(data);
+			outputStreamWriter.append(data);
+			outputStreamWriter.close();
+		} catch (IOException e) {
+			Log.i("Exception", "File write failed: " + e.toString());
+		}
+	}
+
 	private String readFromFile() {
 
-	    String ret = "";
+		String ret = "";
 
-	    try {
-	        InputStream inputStream = openFileInput("errorReport.txt");
+		try {
+			InputStream inputStream = openFileInput("errorReport.txt");
 
-	        if ( inputStream != null ) {
-	            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-	            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-	            String receiveString = "";
-	            StringBuilder stringBuilder = new StringBuilder();
+			if (inputStream != null) {
+				InputStreamReader inputStreamReader = new InputStreamReader(
+						inputStream);
+				BufferedReader bufferedReader = new BufferedReader(
+						inputStreamReader);
+				String receiveString = "";
+				StringBuilder stringBuilder = new StringBuilder();
 
-	            while ( (receiveString = bufferedReader.readLine()) != null ) {
-	                stringBuilder.append(receiveString);
-	            }
+				while ((receiveString = bufferedReader.readLine()) != null) {
+					stringBuilder.append(receiveString);
+				}
 
-	            inputStream.close();
-	            ret = stringBuilder.toString();
-	        }
-	    }
-	    catch (FileNotFoundException e) {
-	        Log.e("login activity", "File not found: " + e.toString());
-	    } catch (IOException e) {
-	        Log.e("login activity", "Can not read file: " + e.toString());
-	    }
+				inputStream.close();
+				ret = stringBuilder.toString();
+			}
+		} catch (FileNotFoundException e) {
+			Log.e("login activity", "File not found: " + e.toString());
+		} catch (IOException e) {
+			Log.e("login activity", "Can not read file: " + e.toString());
+		}
 
-	    return ret;
+		return ret;
 	}
 }
