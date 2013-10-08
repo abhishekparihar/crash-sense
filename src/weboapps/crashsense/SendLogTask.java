@@ -7,6 +7,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class SendLogTask extends AsyncTask<String, String, String> {
 	String[] strParams;
@@ -20,6 +21,7 @@ public class SendLogTask extends AsyncTask<String, String, String> {
 		nvParams.add(new BasicNameValuePair("error_controller", params[0]));
 		nvParams.add(new BasicNameValuePair("error", params[1]));
 		nvParams.add(new BasicNameValuePair("error_info", params[2]));
+		
 		String response = webService.webPost(nvParams);
 		return response;
 	}

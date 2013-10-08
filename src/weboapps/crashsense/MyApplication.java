@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream.GetField;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -16,12 +17,13 @@ import android.util.Log;
 
 public class MyApplication extends Application {
 	
-	 private UncaughtExceptionHandler defaultUEH;
+	private UncaughtExceptionHandler defaultUEH;
+	private final static String TAG=GetField.class.getName();
 	 
 	 @Override
 	public void onCreate() {
-		// TODO Auto-generated method stub
-		super.onCreate();
+		super.onCreate();	
+		Log.v(TAG,"myapp");
 	}
 	 
 	 private Thread.UncaughtExceptionHandler uncaughtExceptionHandler = new Thread.UncaughtExceptionHandler() {
@@ -32,15 +34,22 @@ public class MyApplication extends Application {
 			Log.v("Crash Sense localazied messgae", ex.getLocalizedMessage());
 			//Log.v("Crash Sense stack trace", ex.getStackTrace().);
 			StringWriter sw = new StringWriter();
+			
 			PrintWriter pw = new PrintWriter(sw);
+			
 			ex.printStackTrace(pw);
+			
 			Log.v("Crash Sense", sw.toString());
 			
 			String[] params = new String[3];
 			params[0] = ex.getClass().toString();
+			
 			params[1] = ex.getMessage();
+			
 			params[2] = sw.toString();
+			
 			new SendLogTask().execute(params);
+			
 			writeToFile(sw.toString());
 			defaultUEH.uncaughtException(thread, ex);
 			
@@ -62,7 +71,7 @@ public class MyApplication extends Application {
 	        outputStreamWriter.close();
 	    }
 	    catch (IOException e) {
-	        Log.e("Exception", "File write failed: " + e.toString());
+	        Log.i("Exception", "File write failed: " + e.toString());
 	    } 
 	}
 	

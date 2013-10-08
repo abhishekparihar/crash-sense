@@ -32,6 +32,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 public class WebService {
 	private DefaultHttpClient httpClient;
 	private HttpContext localContext;
@@ -106,8 +108,10 @@ public class WebService {
 
 	public String webPost(List<NameValuePair> params) {
 		String postUrl = webServiceUrl;
+		
 
 		httpPost = new HttpPost(postUrl);
+		
 
 		try {
 			httpPost.setEntity(new UrlEncodedFormEntity(params));
