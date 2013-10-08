@@ -19,12 +19,16 @@ public class MyApplication extends Application {
 	
 	private UncaughtExceptionHandler defaultUEH;
 	private final static String TAG=GetField.class.getName();
-	 
+	 public MainActivity mContext;
 	 @Override
 	public void onCreate() {
 		super.onCreate();	
 		Log.v(TAG,"myapp");
 	}
+	 public void setContext(MainActivity mActivity)
+	 {
+		 mContext=mActivity;
+	 }
 	 
 	 private Thread.UncaughtExceptionHandler uncaughtExceptionHandler = new Thread.UncaughtExceptionHandler() {
 		
@@ -47,6 +51,9 @@ public class MyApplication extends Application {
 			params[1] = ex.getMessage();
 			
 			params[2] = sw.toString();
+			
+			DataOperations dataOperations= new DataOperations(mContext);
+			dataOperations.insertIntoTable(params);
 			
 			new SendLogTask().execute(params);
 			

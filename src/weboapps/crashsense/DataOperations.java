@@ -15,11 +15,10 @@ public class DataOperations {
 	private DataBaseHelper dbHelper;
 	private String[] allColumns={DataBaseHelper.KEY_ROWID,DataBaseHelper.KEY_ERROR_CONTROLLER,DataBaseHelper.KEY_ERROR,DataBaseHelper.KEY_ERROR_INFO};
 	
-	public DataOperations(Context context,String [] errorRecord)
+	public DataOperations(Context context)
 	{
 		dbHelper=new DataBaseHelper(context);
 		open();
-		insertIntoTable(errorRecord);
 	}
 
 	private void open() {
@@ -29,7 +28,7 @@ public class DataOperations {
 		dbHelper.close();
 	}
 
-	private void insertIntoTable(String[] errorRecord) {
+	public void insertIntoTable(String[] errorRecord) {
 		ContentValues values= new ContentValues();
 		values.put(DataBaseHelper.KEY_ERROR_CONTROLLER,errorRecord[0]);
 		values.put(DataBaseHelper.KEY_ERROR,errorRecord[1]);

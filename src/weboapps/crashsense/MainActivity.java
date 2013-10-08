@@ -17,6 +17,8 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		
+		MyApplication myApplication= new MyApplication();
+		myApplication.setContext(this);
 		Log.v(TAG,"main");
 		
 		textView = (EditText)findViewById(R.id.textView);
