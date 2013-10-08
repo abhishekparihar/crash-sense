@@ -23,6 +23,7 @@ public class SendLogTask extends AsyncTask<String, String, String> {
 		nvParams.add(new BasicNameValuePair("error_info", params[2]));
 		
 		String response = webService.webPost(nvParams);
+		
 		return response;
 	}
 	

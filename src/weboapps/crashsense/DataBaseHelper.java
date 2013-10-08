@@ -17,7 +17,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 	public static final String KEY_ERROR_INFO="error_info";
 	
 	private static final String DATABASE_NAME="crashsensor";
-	private static final String DATABASE_TABLE="errorreport";
+	public static final String DATABASE_TABLE="errorreport";
 	private static final int DATABASE_VERSION=1;
 	
     private static final String DATABASE_CREATE = "create table "
