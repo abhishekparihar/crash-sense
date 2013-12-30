@@ -49,11 +49,14 @@ public class MyApplication extends Application {
 			DataOperations dataOperations = new DataOperations(getApplicationContext());
 			dataOperations.insertIntoTable(params);
 
-			new SendLogTask().execute(params);
-
-			writeToFile(sw.toString());
-			defaultUEH.uncaughtException(thread, ex);
-
+			if(new NetworkDetector(getApplicationContext()).isNetworkAvailable()){
+				Log.v("network: available","make api call");
+				new SendLogTask().execute(params);
+			}else{
+				Log.v("network: unavailable","writing to file");
+				writeToFile(sw.toString());
+				defaultUEH.uncaughtException(thread, ex);
+			}
 		}
 	};
 
