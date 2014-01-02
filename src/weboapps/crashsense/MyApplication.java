@@ -47,7 +47,7 @@ public class MyApplication extends Application {
 			params[3] = ex.getClass().toString();
 			params[4] = ex.getMessage();
 			params[5] = sw.toString();
-			params[6] = sw.toString();
+			params[6] = API_KEY;
 
 			DataOperations dataOperations = new DataOperations(getApplicationContext());
 			dataOperations.insertIntoTable(params);

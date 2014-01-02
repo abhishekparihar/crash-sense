@@ -34,8 +34,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.myjson.JsonObject;
-
 import android.util.Log;
 
 public class WebService {
@@ -74,7 +72,6 @@ public class WebService {
 		httpPost = new HttpPost(webServiceUrl + methodName);
 		response = null;
 		StringEntity tmp = null;
-//		httpPost.setHeader("Accept","text/html,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5");
 		httpPost.setHeader("Content-type", "application/json");
 		if (contentType != null) {
 			httpPost.setHeader("Content-Type", contentType);
@@ -101,20 +98,14 @@ public class WebService {
 		httpPost = new HttpPost(postUrl);
 		Log.v("web",""+webServiceUrl);
 		Log.v("web",""+httpPost);
-//		______________________________________________
-            StringEntity se;
-			try {
-				se = new StringEntity( jsonObject.toString());
-				se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-		        httpPost.setEntity(se);
-			} catch (UnsupportedEncodingException e1) {
-				e1.printStackTrace();
-			}  
-//		______________________________________________
-//		try {
-//			httpPost.setEntity(new UrlEncodedFormEntity(params));
-//		} catch (UnsupportedEncodingException uee) {
-//		}
+        StringEntity se;
+		try {
+			se = new StringEntity( jsonObject.toString());
+			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+		    httpPost.setEntity(se);
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}  
 		try {
 			response = httpClient.execute(httpPost);
 			Log.v("web",""+response);
