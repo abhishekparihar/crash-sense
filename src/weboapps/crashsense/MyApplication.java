@@ -10,11 +10,16 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
+import android.text.format.DateFormat;
 import android.util.Log;
 
+@SuppressLint("SimpleDateFormat")
 public class MyApplication extends Application {
 
 	private UncaughtExceptionHandler defaultUEH;
@@ -51,16 +56,18 @@ public class MyApplication extends Application {
 
 			DataOperations dataOperations = new DataOperations(getApplicationContext());
 			dataOperations.insertIntoTable(params);
+			
+			writeToFile(sw.toString());
 
-			NetworkDetector mNetworkDetector= new NetworkDetector(getApplicationContext());
-			if(mNetworkDetector.isNetworkAvailable()){
-				Log.e("network: available","make api call");
-				new SendLogTask(mNetworkDetector,getApplicationContext()).execute(params);
-			}else{
-				Log.e("network: unavailable","writing to file");
-				writeToFile(sw.toString());
-				defaultUEH.uncaughtException(thread, ex);
-			}
+//			NetworkDetector mNetworkDetector= new NetworkDetector(getApplicationContext());
+//			if(mNetworkDetector.isNetworkAvailable()){
+//				Log.e("network: available","make api call");
+//				new SendLogTask(mNetworkDetector,getApplicationContext()).execute(params);
+//			}else{
+//				Log.e("network: unavailable","writing to file");
+//				writeToFile(sw.toString());
+//				defaultUEH.uncaughtException(thread, ex);
+//			}
 		}
 
 		private String getDeviceType() {
@@ -77,10 +84,11 @@ public class MyApplication extends Application {
 
 	private void writeToFile(String data) {
 		try {
-			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput("errorReport.txt", Context.MODE_PRIVATE));
+			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput(getFileName(), Context.MODE_PRIVATE));
 			outputStreamWriter.write(data);
 			outputStreamWriter.append(data);
 			outputStreamWriter.close();
+			Log.i("File operation", "File write operation : Complete.");
 		} catch (IOException e) {
 			Log.i("Exception", "File write failed: " + e.toString());
 		}
@@ -96,6 +104,15 @@ public class MyApplication extends Application {
 //			Log.i("Exception", "File write failed: " + e.toString());
 //		}
 //	}
+
+	private String getFileName() {
+		SimpleDateFormat sdf= new SimpleDateFormat("EEEdMMMyyyy-HH:mm:ss");
+		Date date = new Date();
+		String strDate= sdf.format(date);
+		strDate.trim();
+		Log.i("File Name: ",strDate);
+		return strDate;
+	}
 
 	private String readFromFile() {
 		String ret = "";
