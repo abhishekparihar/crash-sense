@@ -27,7 +27,6 @@ public class MyApplication extends Application {
 	private final String strOs = "Android";
 	private final String API_KEY = "111e3e86489477106e0160ec3c7eb54d";
 	private final String strOsVersion = android.os.Build.VERSION.RELEASE;
-
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -78,33 +77,25 @@ public class MyApplication extends Application {
 	};
 
 	public MyApplication() {
-		defaultUEH = Thread.getDefaultUncaughtExceptionHandler();
+		defaultUEH = Thread.getDefaultUncaughtExceptionHandler(); 
 		Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
-	}
+	} 
 
 	private void writeToFile(String data) {
 		try {
-			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput(getFileName(), Context.MODE_PRIVATE));
+			String strFileName=getFileName();  
+			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput(strFileName, Context.MODE_PRIVATE));
 			outputStreamWriter.write(data);
-			outputStreamWriter.append(data);
-			outputStreamWriter.close();
+			outputStreamWriter.close(); 
+			OutputStreamWriter outputStreamWriterFileName = new OutputStreamWriter(openFileOutput("filename.txt", Context.MODE_APPEND));
+			outputStreamWriterFileName.write(strFileName+"\n");
+			outputStreamWriterFileName.close();
 			Log.i("File operation", "File write operation : Complete.");
 		} catch (IOException e) {
-			Log.i("Exception", "File write failed: " + e.toString());
+			Log.i("Exception", "File write failed: " + e.toString()); 
 		}
 	}
 	
-//	public static void registerUnsuccessfullResponce(String data) {
-//		try {
-//			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput("errorReport.txt", Context.MODE_PRIVATE));
-//			outputStreamWriter.write(data);
-//			outputStreamWriter.append(data);
-//			outputStreamWriter.close();
-//		} catch (IOException e) {
-//			Log.i("Exception", "File write failed: " + e.toString());
-//		}
-//	}
-
 	private String getFileName() {
 		SimpleDateFormat sdf= new SimpleDateFormat("EEEdMMMyyyy-HH:mm:ss");
 		Date date = new Date();
@@ -113,7 +104,7 @@ public class MyApplication extends Application {
 		Log.i("File Name: ",strDate);
 		return strDate;
 	}
-
+	
 	private String readFromFile() {
 		String ret = "";
 		try {
@@ -137,4 +128,15 @@ public class MyApplication extends Application {
 		}
 		return ret;
 	}
+	
+//	public static void registerUnsuccessfullResponce(String data) {
+//		try {
+//			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput("errorReport.txt", Context.MODE_PRIVATE));
+//			outputStreamWriter.write(data);
+//			outputStreamWriter.append(data);
+//			outputStreamWriter.close();
+//		} catch (IOException e) {
+//			Log.i("Exception", "File write failed: " + e.toString());
+//		}
+//	}
 }
