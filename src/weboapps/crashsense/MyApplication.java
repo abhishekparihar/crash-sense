@@ -17,7 +17,6 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.text.format.DateFormat;
-import android.util.Log;
 
 @SuppressLint("SimpleDateFormat")
 public class MyApplication extends Application {
@@ -36,23 +35,23 @@ public class MyApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		Log.v(TAG, "myapp");
+		LOG.v(TAG, "myapp");
 	}
 
 	private Thread.UncaughtExceptionHandler uncaughtExceptionHandler = new Thread.UncaughtExceptionHandler() {
 
 		@Override
 		public void uncaughtException(Thread thread, Throwable ex) {
-			Log.v("Crash Sense", ex.getMessage());
-			Log.v("Crash Sense localazied messgae", ex.getLocalizedMessage());
+			LOG.v("Crash Sense", ex.getMessage());
+			LOG.v("Crash Sense localazied messgae", ex.getLocalizedMessage());
 			
-			StringWriter sw = new StringWriter();
+			StringWriter sw = new StringWriter(); 
 			PrintWriter pw = new PrintWriter(sw);
 			ex.printStackTrace(pw);
-			Log.v("Crash Sense", sw.toString());
+			LOG.v("Crash Sense", sw.toString());
 			String[] params = new String[7];
 			params[0] = strOs;
-			params[1] =	strOsVersion ;
+			params[1] =	strOsVersion ; 
 			params[2] = getDeviceType();
 			params[3] = ex.getClass().toString();
 			params[4] = ex.getMessage();
@@ -63,14 +62,14 @@ public class MyApplication extends Application {
 			dataOperations.insertIntoTable(params);
 			
 			writeToFile(params);
-//			uploadCrashLogFromFile();
+			uploadCrashLogFromFile();
 //			NetworkDetector mNetworkDetector= new NetworkDetector(getApplicationContext());
 //			if(mNetworkDetector.isNetworkAvailable()){
-//				Log.e("network: available","make api call");
+//				LOG.e("network: available","make api call");
 //				new SendLogTask(mNetworkDetector,getApplicationContext()).execute(params);
 //			}else{
-//				Log.e("network: unavailable","writing to file");
-//				writeToFile(sw.toString());
+//				LOG.e("network: unavailable","writing to file");
+//				writeToFile(params);
 //				defaultUEH.uncaughtException(thread, ex);
 //			}
 		}
@@ -82,20 +81,20 @@ public class MyApplication extends Application {
 		}
 	};
 
-	private void writeToFile(String[] data) {
+	private void writeToFile(String[] params) {
 		try {
 			String strFileName=getFileName();  
 			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput(strFileName, Context.MODE_PRIVATE));
-			for (int i = 0; i < data.length; i++) {
-				outputStreamWriter.write(data[i]+"\n");
+			for (int i = 0; i < params.length; i++) {
+				outputStreamWriter.write(params[i]+"\n---");
 			}
 			outputStreamWriter.close(); 
 			OutputStreamWriter outputStreamWriterFileName = new OutputStreamWriter(openFileOutput("filename.txt", Context.MODE_APPEND));
 			outputStreamWriterFileName.write(strFileName+"\n");
 			outputStreamWriterFileName.close();
-			Log.i("File operation", "File write operation : Complete.");
+			LOG.i("File operation", "File write operation : Complete.");
 		} catch (IOException e) {
-			Log.i("Exception", "File write failed: " + e.toString()); 
+			LOG.i("Exception", "File write failed: " + e.toString()); 
 		}
 	}
 	
@@ -104,30 +103,33 @@ public class MyApplication extends Application {
 		Date date = new Date();
 		String strDate= sdf.format(date);
 		strDate.trim();
-		Log.i("File Name: ",strDate);
+		LOG.i("File Name: ",strDate);
 		return strDate;
 	}
 	
 	private void uploadCrashLogFromFile() {
-		String strFilename=null;
 		try {
 			InputStream inputStream = openFileInput("filename.txt");
 			if(inputStream!=null) {
 				InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 				BufferedReader bufferedReader= new BufferedReader(inputStreamReader);
-				String strFileLine;
-				while((strFileLine = bufferedReader.readLine())!= null) {
-					Log.v("line",strFileLine);
-					String strFileContent=readFromFile(strFileLine);
-					Log.v("file content",strFileContent);
+				String strFilename;
+				while((strFilename = bufferedReader.readLine())!= null) {
+					LOG.v("filename",strFilename);
+					String strFileContent=readFromFile(strFilename);
+					String [] paramStrings= getStringArrayFromFileContent(strFileContent);
+					NetworkDetector mNetworkDetector= new NetworkDetector(getApplicationContext());
+					if(mNetworkDetector.isNetworkAvailable()){
+						LOG.e("network: available","make api call");
+						new SendLogTask(mNetworkDetector,getApplicationContext()).execute(paramStrings);
+					}
+					LOG.v("upload","upload complete");
 				}
 			}
 		}
 		catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		readFromFile(strFilename);
 	}
 	
 	private String readFromFile(String filename) {
@@ -142,16 +144,23 @@ public class MyApplication extends Application {
 				while ((receiveString = bufferedReader.readLine()) != null) {
 					stringBuilder.append(receiveString);
 				}
-				inputStream.close();
+				inputStream.close(); 
 				ret = stringBuilder.toString();
 			}
 		} catch (FileNotFoundException e) {
-			Log.e("login activity", "File not found: " + e.toString());
+			LOG.e("LOGin activity", "File not found: " + e.toString());
 		} catch (IOException e) {
-			Log.e("login activity", "Can not read file: " + e.toString());
+			LOG.e("LOGin activity", "Can not read file: " + e.toString());
 		}
 		return ret;
 	}
+	
+	private String[] getStringArrayFromFileContent(String strFileContent) {
+		String [] params= new String[7];
+		params = strFileContent.split("---");
+		return params;
+	}
+
 	
 //	public static void registerUnsuccessfullResponce(String data) {
 //		try {
@@ -160,7 +169,7 @@ public class MyApplication extends Application {
 //			outputStreamWriter.append(data);
 //			outputStreamWriter.close();
 //		} catch (IOException e) {
-//			Log.i("Exception", "File write failed: " + e.toString());
+//			LOG.i("Exception", "File write failed: " + e.toString());
 //		}
 //	}
 }
