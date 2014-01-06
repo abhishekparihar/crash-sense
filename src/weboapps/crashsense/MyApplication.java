@@ -27,6 +27,12 @@ public class MyApplication extends Application {
 	private final String strOs = "Android";
 	private final String API_KEY = "111e3e86489477106e0160ec3c7eb54d";
 	private final String strOsVersion = android.os.Build.VERSION.RELEASE;
+	
+	public MyApplication() {
+		defaultUEH = Thread.getDefaultUncaughtExceptionHandler(); 
+		Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
+	} 
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -56,8 +62,8 @@ public class MyApplication extends Application {
 			DataOperations dataOperations = new DataOperations(getApplicationContext());
 			dataOperations.insertIntoTable(params);
 			
-			writeToFile(sw.toString());
-
+			writeToFile(params);
+//			uploadCrashLogFromFile();
 //			NetworkDetector mNetworkDetector= new NetworkDetector(getApplicationContext());
 //			if(mNetworkDetector.isNetworkAvailable()){
 //				Log.e("network: available","make api call");
@@ -76,16 +82,13 @@ public class MyApplication extends Application {
 		}
 	};
 
-	public MyApplication() {
-		defaultUEH = Thread.getDefaultUncaughtExceptionHandler(); 
-		Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
-	} 
-
-	private void writeToFile(String data) {
+	private void writeToFile(String[] data) {
 		try {
 			String strFileName=getFileName();  
 			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput(strFileName, Context.MODE_PRIVATE));
-			outputStreamWriter.write(data);
+			for (int i = 0; i < data.length; i++) {
+				outputStreamWriter.write(data[i]+"\n");
+			}
 			outputStreamWriter.close(); 
 			OutputStreamWriter outputStreamWriterFileName = new OutputStreamWriter(openFileOutput("filename.txt", Context.MODE_APPEND));
 			outputStreamWriterFileName.write(strFileName+"\n");
@@ -105,11 +108,32 @@ public class MyApplication extends Application {
 		return strDate;
 	}
 	
-	private String readFromFile() {
+	private void uploadCrashLogFromFile() {
+		String strFilename=null;
+		try {
+			InputStream inputStream = openFileInput("filename.txt");
+			if(inputStream!=null) {
+				InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+				BufferedReader bufferedReader= new BufferedReader(inputStreamReader);
+				String strFileLine;
+				while((strFileLine = bufferedReader.readLine())!= null) {
+					Log.v("line",strFileLine);
+					String strFileContent=readFromFile(strFileLine);
+					Log.v("file content",strFileContent);
+				}
+			}
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		readFromFile(strFilename);
+	}
+	
+	private String readFromFile(String filename) {
 		String ret = "";
 		try {
-			InputStream inputStream = openFileInput("errorReport.txt");
-
+			InputStream inputStream = openFileInput(filename);
 			if (inputStream != null) {
 				InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 				BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
