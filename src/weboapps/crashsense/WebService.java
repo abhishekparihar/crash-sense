@@ -36,6 +36,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 public class WebService {
 	
 	private DefaultHttpClient httpClient;
@@ -52,7 +54,7 @@ public class WebService {
 		httpClient = new DefaultHttpClient(myParams);
 		localContext = new BasicHttpContext();
 		webServiceUrl = serviceName;
-		LOG.v("web",""+webServiceUrl);
+		Log.v("web",""+webServiceUrl);
 	}
 
 	public String webInvoke(String methodName, Map<String, Object> params) {
@@ -96,8 +98,8 @@ public class WebService {
 	public String webPost(JSONObject jsonObject) {
 		String postUrl = webServiceUrl;
 		httpPost = new HttpPost(postUrl);
-		LOG.v("web", "" + webServiceUrl);
-		LOG.v("web", "" + httpPost);
+		Log.v("web", "" + webServiceUrl);
+		Log.v("web", "" + httpPost);
 		StringEntity se;
 		try {
 			se = new StringEntity(jsonObject.toString());
@@ -105,28 +107,22 @@ public class WebService {
 					"application/json"));
 			httpPost.setEntity(se);
 			response = httpClient.execute(httpPost);
-			LOG.v("web", "" + response);
+			Log.v("web", "" + response);
 			ret = EntityUtils.toString(response.getEntity());
-			LOG.v("web", ret);
+			Log.v("web", ret);
 		} catch (UnsupportedEncodingException e) {
 			
 		} catch (ClientProtocolException e) {
 			
 		} catch (SocketTimeoutException e) {
-			
+			Log.v("web", ret);
 		} catch (ConnectTimeoutException e) {
-			
+			Log.v("web", ret);
 		} catch (IOException e) {
 		}
 
 		return ret;
 	}
-
-	/*
-	 * public static JSONObject Object(Object o) { try { return new
-	 * JSONObject(new Gson().toJson(o)); } catch (JSONException e) {
-	 * e.printStackTrace(); } return null; }
-	 */
 
 	public InputStream postHttpStream(String urlString) throws IOException {
 		InputStream in = null;

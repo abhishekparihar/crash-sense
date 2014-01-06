@@ -1,13 +1,12 @@
 package weboapps.crashsense;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-
-import com.google.myjson.Gson;
 
 public class SendLogTask extends AsyncTask<String, String, String> {
 	String[] strParams;
@@ -21,10 +20,9 @@ public class SendLogTask extends AsyncTask<String, String, String> {
 
 	@Override
 	protected String doInBackground(String... params) {
-//		WebService webService = new WebService("http://10.0.1.109:3001/api/v1/error_reports");
 		WebService webService = new WebService("http://stage106.weboapps.com/api/v1/error_reports");
-		String response = webService.webPost(getJsonFromString(params));	
-		mResponseModel = new Gson().fromJson(response, ResponseModel.class);
+		String response = webService.webPost(getJsonFromString(params));
+		mResponseModel = setResponseModel(response);
 		if(mResponseModel.isStatus())
 		{
 			Log.v("result : true",mResponseModel.getMessage());
@@ -34,7 +32,7 @@ public class SendLogTask extends AsyncTask<String, String, String> {
 		}
 		return null;
 	}
-	
+
 	private JSONObject getJsonFromString(String[] params) {
 		JSONObject json = new JSONObject();
 		JSONObject jsonError = new JSONObject();
@@ -53,6 +51,19 @@ public class SendLogTask extends AsyncTask<String, String, String> {
         return json;
 	}
 
+
+	private ResponseModel setResponseModel(String response) {
+		try {
+			JSONObject jsonObject= new JSONObject(response);
+			ResponseModel mResponseModel= new ResponseModel();
+			mResponseModel.setStatus(jsonObject.getBoolean("status"));
+			mResponseModel.setMessage(jsonObject.getString("message"));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return mResponseModel;
+	}
+	
 	@Override
 	protected void onPostExecute(String result) {
 		super.onPostExecute(result);
