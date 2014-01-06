@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Iterator;
@@ -20,6 +21,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -33,8 +35,6 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.util.Log;
 
 public class WebService {
 	
@@ -52,7 +52,7 @@ public class WebService {
 		httpClient = new DefaultHttpClient(myParams);
 		localContext = new BasicHttpContext();
 		webServiceUrl = serviceName;
-		Log.v("web",""+webServiceUrl);
+		LOG.v("web",""+webServiceUrl);
 	}
 
 	public String webInvoke(String methodName, Map<String, Object> params) {
@@ -96,32 +96,29 @@ public class WebService {
 	public String webPost(JSONObject jsonObject) {
 		String postUrl = webServiceUrl;
 		httpPost = new HttpPost(postUrl);
-		Log.v("web",""+webServiceUrl);
-		Log.v("web",""+httpPost);
-        StringEntity se;
+		LOG.v("web", "" + webServiceUrl);
+		LOG.v("web", "" + httpPost);
+		StringEntity se;
 		try {
-			se = new StringEntity( jsonObject.toString());
-			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-		    httpPost.setEntity(se);
-		} catch (UnsupportedEncodingException e1) {
-			e1.printStackTrace();
-		}  
-		try {
+			se = new StringEntity(jsonObject.toString());
+			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
+					"application/json"));
+			httpPost.setEntity(se);
 			response = httpClient.execute(httpPost);
-			Log.v("web",""+response);
-		} catch (Exception e) {
-			if (e.getMessage() != null) {
-			} else {
-			}
-		}
-		try {
+			LOG.v("web", "" + response);
 			ret = EntityUtils.toString(response.getEntity());
-			Log.v("web",ret);
-		} catch (Exception e) {
-			if (e.getMessage() != null) {
-			} else {
-			}
+			LOG.v("web", ret);
+		} catch (UnsupportedEncodingException e) {
+			
+		} catch (ClientProtocolException e) {
+			
+		} catch (SocketTimeoutException e) {
+			
+		} catch (ConnectTimeoutException e) {
+			
+		} catch (IOException e) {
 		}
+
 		return ret;
 	}
 

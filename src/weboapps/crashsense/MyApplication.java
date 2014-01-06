@@ -69,25 +69,25 @@ public class MyApplication extends Application {
 			params[2] = getDeviceType();
 			params[3] = ex.getClass().toString();  
 			params[4] = ex.getMessage();
-			params[5] = sw.toString();
+			params[5] = sw.toString(); 
 			params[6] = API_KEY;
 
 			DataOperations dataOperations = new DataOperations(getApplicationContext());
 			dataOperations.insertIntoTable(params); 
 
-			try {
+			try { 
 				outputStreamWriterFileName = new OutputStreamWriter(openFileOutput("filename.txt", Context.MODE_APPEND));
-			} catch (FileNotFoundException e) {
+			} catch (FileNotFoundException e) { 
 				e.printStackTrace();
 			}
 			mNetworkDetector= new NetworkDetector(getApplicationContext()); 
 			if(mNetworkDetector.isNetworkAvailable()){
 				uploadCrashLog(params);
-			}else{
+			}else{ 
 				LOG.e("network: unavailable","writing to file");
 				writeToFile(params); 
-//				defaultUEH.uncaughtException(thread, ex);
 			}
+			defaultUEH.uncaughtException(thread, ex);
 		}
 	};
 
@@ -119,9 +119,9 @@ public class MyApplication extends Application {
 	}
 	
 	private String getFileName() {
-		SimpleDateFormat sdf= new SimpleDateFormat("EEEdMMMyyyy-HH:mm:ss"); 
+		SimpleDateFormat sdf= new SimpleDateFormat("EEEdMMMyyyy-HH:mm:ss");  
 		Date date = new Date();
-		String strDate= sdf.format(date);
+		String strDate= sdf.format(date); 
 		strDate.trim();
 		LOG.i("File Name: ",strDate);
 		return strDate;
