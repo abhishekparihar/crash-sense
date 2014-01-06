@@ -21,13 +21,14 @@ public class SendLogTask extends AsyncTask<String, String, String> {
 
 	@Override
 	protected String doInBackground(String... params) {
-		WebService webService = new WebService("http://10.0.1.109:3001/api/v1/error_reports");
+//		WebService webService = new WebService("http://10.0.1.109:3001/api/v1/error_reports");
+		WebService webService = new WebService("http://stage106.weboapps.com/api/v1/error_reports");
 		String response = webService.webPost(getJsonFromString(params));	
-		cancel(true);
 		mResponseModel = new Gson().fromJson(response, ResponseModel.class);
 		if(mResponseModel.isStatus())
 		{
 			Log.v("result : true",mResponseModel.getMessage());
+			((MyApplication) _mContext).onResponseReceived();
 		}else{
 			Log.v("result : false",mResponseModel.getMessage());
 		}
@@ -54,10 +55,9 @@ public class SendLogTask extends AsyncTask<String, String, String> {
 
 	@Override
 	protected void onPostExecute(String result) {
-		 if(!mResponseModel.isStatus()){
-			 Log.v("post",mResponseModel.getMessage());
-		 }
+		super.onPostExecute(result);
 	}
+	
 	@SuppressLint("NewApi")
 	@Override
 	protected void onCancelled(String result) {

@@ -1,7 +1,11 @@
 package weboapps.crashsense;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,6 +16,7 @@ import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Scanner;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
@@ -24,7 +29,8 @@ public class MyApplication extends Application {
 	private UncaughtExceptionHandler defaultUEH;
 	private final static String TAG = GetField.class.getName();
 	private final String strOs = "Android";
-	private final String API_KEY = "111e3e86489477106e0160ec3c7eb54d";
+	private final String API_KEY = "2f418511c853c7c0b1d168d94f97ab2c";
+	private final String FILE_URL = "/data/data/weboapps.crashsense/files/";
 	private final String strOsVersion = android.os.Build.VERSION.RELEASE;
 	
 	public MyApplication() {
@@ -53,25 +59,24 @@ public class MyApplication extends Application {
 			params[0] = strOs;
 			params[1] =	strOsVersion ; 
 			params[2] = getDeviceType();
-			params[3] = ex.getClass().toString();
+			params[3] = ex.getClass().toString();  
 			params[4] = ex.getMessage();
 			params[5] = sw.toString();
 			params[6] = API_KEY;
 
 			DataOperations dataOperations = new DataOperations(getApplicationContext());
-			dataOperations.insertIntoTable(params);
-			
+			dataOperations.insertIntoTable(params); 
+
 			writeToFile(params);
-			uploadCrashLogFromFile();
-//			NetworkDetector mNetworkDetector= new NetworkDetector(getApplicationContext());
-//			if(mNetworkDetector.isNetworkAvailable()){
-//				LOG.e("network: available","make api call");
-//				new SendLogTask(mNetworkDetector,getApplicationContext()).execute(params);
-//			}else{
-//				LOG.e("network: unavailable","writing to file");
+			NetworkDetector mNetworkDetector= new NetworkDetector(getApplicationContext());
+			if(mNetworkDetector.isNetworkAvailable()){
+				LOG.e("network: available","make api call");
+				uploadCrashLogFromFile();
+			}else{
+				LOG.e("network: unavailable","writing to file");
 //				writeToFile(params);
 //				defaultUEH.uncaughtException(thread, ex);
-//			}
+			}
 		}
 
 		private String getDeviceType() {
@@ -80,8 +85,9 @@ public class MyApplication extends Application {
 			return mStringBuilder.toString();
 		}
 	};
+	private String strFilename;
 
-	private void writeToFile(String[] params) {
+	private void writeToFile(String[] params) {  
 		try {
 			String strFileName=getFileName();  
 			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput(strFileName, Context.MODE_PRIVATE));
@@ -113,17 +119,19 @@ public class MyApplication extends Application {
 			if(inputStream!=null) {
 				InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 				BufferedReader bufferedReader= new BufferedReader(inputStreamReader);
-				String strFilename;
-				while((strFilename = bufferedReader.readLine())!= null) {
+				NetworkDetector mNetworkDetector= new NetworkDetector(getApplicationContext());
+				if((strFilename = bufferedReader.readLine())!= null) {
 					LOG.v("filename",strFilename);
-					String strFileContent=readFromFile(strFilename);
+					String strFileContent=getFileContent(strFilename);
 					String [] paramStrings= getStringArrayFromFileContent(strFileContent);
-					NetworkDetector mNetworkDetector= new NetworkDetector(getApplicationContext());
 					if(mNetworkDetector.isNetworkAvailable()){
 						LOG.e("network: available","make api call");
 						new SendLogTask(mNetworkDetector,getApplicationContext()).execute(paramStrings);
 					}
 					LOG.v("upload","upload complete");
+				}
+				else{
+					LOG.i("No file", "No file to upload");
 				}
 			}
 		}
@@ -132,7 +140,60 @@ public class MyApplication extends Application {
 		}
 	}
 	
-	private String readFromFile(String filename) {
+	public void onResponseReceived() {
+		LOG.v("response","received");
+		clearFileRecord();
+		uploadCrashLogFromFile();
+		
+	}
+	
+	private void clearFileRecord() {
+		LOG.v("file record","cleaning file record, file name is : "+strFilename);  
+		File file = new File(FILE_URL+strFilename);
+		boolean deleted = file.delete();
+		if(deleted){
+			LOG.i("file deleted: ","true"); 
+			deleteFileEntry(FILE_URL+"filename.txt", strFilename);
+		}else {
+			LOG.i("file deleted: ","false");
+		}
+	}
+	
+	public void deleteFileEntry(String file, String lineToRemove) {
+		try {
+		  File inFile = new File(file);
+		  if (!inFile.isFile()) {
+		    System.out.println("Parameter is not an existing file");
+		    return;
+		  }
+		  File tempFile = new File(inFile.getAbsolutePath() + ".tmp");
+		  BufferedReader br = new BufferedReader(new FileReader(file));
+		  PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
+		  String line = null;
+		  while ((line = br.readLine()) != null) {
+		    if (!line.trim().equals(lineToRemove)) {
+		      pw.println(line);
+		      pw.flush();
+		    }
+		  }
+		  pw.close();
+		  br.close();
+		  if (!inFile.delete()) {
+		    System.out.println("Could not delete file");
+		    return;
+		  }
+		  if (!tempFile.renameTo(inFile))
+		    System.out.println("Could not rename file");
+		}
+		catch (FileNotFoundException ex) {
+		  ex.printStackTrace();
+		}
+		catch (IOException ex) {
+		  ex.printStackTrace();
+		}
+	}
+	
+	private String getFileContent(String filename) {
 		String ret = "";
 		try {
 			InputStream inputStream = openFileInput(filename);
@@ -158,6 +219,7 @@ public class MyApplication extends Application {
 	private String[] getStringArrayFromFileContent(String strFileContent) {
 		String [] params= new String[7];
 		params = strFileContent.split("---");
+		LOG.i("api_key" ,":"+params[6]+":");
 		return params;
 	}
 
