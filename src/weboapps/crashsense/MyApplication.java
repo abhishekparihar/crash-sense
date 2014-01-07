@@ -87,12 +87,20 @@ public class MyApplication extends Application {
 		}
 	};
 
+	/**
+	 * @return string that has the detail of the device type.
+	 */
 	private String getDeviceType() { 
 		StringBuilder mStringBuilder= new StringBuilder();
 		mStringBuilder.append(android.os.Build.MANUFACTURER+" "+android.os.Build.MODEL);
 		return mStringBuilder.toString();
 	}
 
+	/**
+	 * @param params is array of string that which is needed to be written to the file.
+	 * 	The main function of this function is to write the data received in its argument
+	 * 	in the file.
+	 */
 	public void writeToFile(String[] params) {  
 		try {
 			String strFileName=getFileName();  
@@ -110,6 +118,11 @@ public class MyApplication extends Application {
 		} 
 	}
 	
+	/**
+	 * @return string which further is used as a file name.
+	 * 	This function gets the local machine day, date and time and combining all those
+	 * 	creates a file name. 
+	 */
 	private String getFileName() {
 		SimpleDateFormat sdf= new SimpleDateFormat("EEEdMMMyyyy-HH:mm:ss");  
 		Date date = new Date();
@@ -119,6 +132,12 @@ public class MyApplication extends Application {
 		return strDate;
 	}
 	
+	/**
+	 * This function first reads a file named "filename.txt" where a list of filenames 
+	 * 	are stored. This function reads the top name from the list and get that file 
+	 * 	content. Further this function parsed the string content received and stores 
+	 * 	it in an array which is passed to the web service for uploading.
+	 */
 	private void uploadCrashLogFromFile() { 
 		try {
 			inputStream = openFileInput("filename.txt");
@@ -144,6 +163,13 @@ public class MyApplication extends Application {
 		}
 	}
 	
+	/**
+	 * This function is called when the web service task is successful and we get
+	 * 	correct response. After the response is received it checks if the uploaded 
+	 * 	data was from the file or not. If the data was from the file then that 
+	 * 	file is deleted along with the entry in the "filename.txt" file and 
+	 * 	then function to upload the data from the is file is called once again.
+	 */
 	public void onResponseReceived() {
 		Log.e("response","upload complete");
 		if(Constants.IS_UPLOADED_FROM_FILE) { 
@@ -152,12 +178,12 @@ public class MyApplication extends Application {
 		uploadCrashLogFromFile();
 	}
 	
-	public void onResponseError(){
-		
-	}
-	
+	/**
+	 * 	This function deletes the file from the memory and also the file entry from 
+	 * 	the "filename.txt" file.
+	 */
 	private void clearFileRecord() {
-		Log.v("file record","cleaning file record, file name is : "+strFilename);  
+		Log.v("File record","Cleaning file record, file name is : "+strFilename);  
 		File file = new File(Constants.FILE_URL+strFilename);
 		boolean deleted = file.delete();
 		if(deleted){
@@ -168,6 +194,11 @@ public class MyApplication extends Application {
 		}
 	}
 	
+	/**
+	 * @param file is the filename which you have to modify
+	 * @param lineToRemove is the content you want to delete.
+	 * 	This function deletes the top entry (first line) from the list of file names.
+	 */
 	public void deleteFileEntryFromFilename(String file, String lineToRemove) {
 		try {
 		  File inFile = new File(file);
@@ -202,6 +233,10 @@ public class MyApplication extends Application {
 		}
 	}
 	
+	/**
+	 * @param filename name of the file whose content you want to read.
+	 * @return string which has the content of the file.
+	 */
 	private String getFileContent(String filename) {
 		String ret = "";
 		try {
@@ -225,6 +260,11 @@ public class MyApplication extends Application {
 		return ret;
 	}
 	
+	/**
+	 * @param strFileContent string that you have to parse.
+	 * @return array of string 
+	 * 	This function returns an array of string parsed from a single string. 
+	 */
 	private String[] getStringArrayFromFileContent(String strFileContent) {
 		String [] params= new String[7];
 		params = strFileContent.split("---");
