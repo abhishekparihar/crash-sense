@@ -8,18 +8,29 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+/**
+ * @author webonise
+ *	This is the class extended from the AsyncTask which is used to run the web service 
+ *	process in the background. This class makes a web service request and passes a 
+ *	string value along with the request. The received response which is in json format
+ *	parsed and value is added to the model. On receiving success response the control is 
+ *	redirected to the application.
+ */
 public class SendLogTask extends AsyncTask<String, String, String> {
 	String[] strParams;
 	Context _mContext;
-	NetworkDetector mNetworkDetector;
-	public SendLogTask(NetworkDetector mNetworkDetector,Context context) {
-		this.mNetworkDetector=mNetworkDetector;	
+	
+	/**
+	 * @param context context of the application.
+	 *  Constructor to get the context of the application.
+	 */
+	public SendLogTask(Context context) {
 		this._mContext=(MyApplication)context;
 	}
  
 	@Override
 	protected String doInBackground(String... params) {
-		WebService webService = new WebService("http://stage106.weboapps.com/api/v1/error_reports",_mContext,params);
+		WebService webService = new WebService(Constants.BASE_URL+"/api/v1/error_reports",_mContext,params);
 		String response = webService.webPost(getJsonFromString(params));
 		ResponseModel mResponseModel = setResponseModel(response);
 		if(mResponseModel.isStatus())
@@ -32,6 +43,10 @@ public class SendLogTask extends AsyncTask<String, String, String> {
 		return null;
 	}
 
+	/**
+	 * @param params array of string having the device details and crash log details.
+	 * @return a json object having the same detail in string array format. 
+	 */
 	private JSONObject getJsonFromString(String[] params) {
 		JSONObject json = new JSONObject();
 		JSONObject jsonError = new JSONObject();
@@ -51,6 +66,10 @@ public class SendLogTask extends AsyncTask<String, String, String> {
 	}
 
 
+	/**
+	 * @param response json response received in a string format.
+	 * @return response model having data from response string.
+	 */
 	private ResponseModel setResponseModel(String response) {
 		ResponseModel mResponseModel = null;
 		try {

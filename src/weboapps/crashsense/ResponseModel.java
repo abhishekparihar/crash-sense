@@ -1,5 +1,11 @@
 package weboapps.crashsense;
 
+/**
+ * @author webonise
+ *	This class is the model representation of the response getting from the server.
+ *	Class has two variables status(boolean value) , message(string value).
+ *	Class contains the getter and setter method to get and set the object values.
+ */
 public class ResponseModel {
 	boolean status;
 	String message;

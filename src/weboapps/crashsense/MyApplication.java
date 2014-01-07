@@ -35,11 +35,7 @@ import android.util.Log;
 public class MyApplication extends Application {
 
 	private UncaughtExceptionHandler defaultUEH;
-	private NetworkDetector mNetworkDetector;
 	private String strFilename;
-	private FileInputStream inputStream;
-	private InputStreamReader inputStreamReader;
-	private BufferedReader bufferedReader;
 	
 	/**
 	 * Constructor to initialize the base UncaughtExceptionHandler object.
@@ -75,10 +71,10 @@ public class MyApplication extends Application {
 			/*	Check if the network is available,
 			 *  if the network is available then upload the file on the server,
 			 *  if the network is not available then write the error in a file .*/
-			mNetworkDetector= new NetworkDetector(getApplicationContext()); 
+			NetworkDetector mNetworkDetector = new NetworkDetector(getApplicationContext()); 
 			if(mNetworkDetector.isNetworkAvailable()){
 				Log.e("network: available","uploading file");
-				new SendLogTask(mNetworkDetector,getApplicationContext()).execute(params);
+				new SendLogTask(getApplicationContext()).execute(params);
 			}else{ 
 				Log.e("network: unavailable","writing to file");
 				writeToFile(params); 
@@ -140,15 +136,15 @@ public class MyApplication extends Application {
 	 */
 	private void uploadCrashLogFromFile() { 
 		try {
-			inputStream = openFileInput("filename.txt");
+			FileInputStream inputStream = openFileInput("filename.txt");
 			if(inputStream!=null) {
-				inputStreamReader = new InputStreamReader(inputStream);  
-				bufferedReader= new BufferedReader(inputStreamReader); 
+				InputStreamReader inputStreamReader = new InputStreamReader(inputStream);  
+				BufferedReader bufferedReader = new BufferedReader(inputStreamReader); 
 				if((strFilename = bufferedReader.readLine())!= null) {
 					Constants.IS_UPLOADED_FROM_FILE=true;
 					String strFileContent=getFileContent(strFilename);
 					String [] paramStrings= getStringArrayFromFileContent(strFileContent);
-					new SendLogTask(mNetworkDetector,getApplicationContext()).execute(paramStrings);
+					new SendLogTask(getApplicationContext()).execute(paramStrings);
 				}
 				else {
 					Constants.IS_UPLOADED_FROM_FILE = false;

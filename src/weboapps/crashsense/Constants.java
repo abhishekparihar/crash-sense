@@ -1,5 +1,9 @@
 package weboapps.crashsense;
 
+/**
+ * @author webonise
+ *	This class content all the constant value used in the application.
+ */
 public class Constants {
 	public static final String OS = "Android";
 	public static final String BASE_URL = "http://stage106.weboapps.com";
