@@ -104,18 +104,26 @@ public class WebService {
 		String postUrl = webServiceUrl;
 		httpPost = new HttpPost(postUrl);
 		Log.v("web", "" + webServiceUrl);
+		Log.v("web", "" + httpPost);
 		StringEntity se;
 		try {
 			se = new StringEntity(jsonObject.toString());
-			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,"application/json"));
+			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
+					"application/json"));
 			httpPost.setEntity(se);
 			response = httpClient.execute(httpPost);
+			Log.v("web", "" + response);
 			ret = EntityUtils.toString(response.getEntity());
 			Log.v("web", ret);
+		} catch (UnsupportedEncodingException e) {
+			
+		} catch (ClientProtocolException e) {
+			
 		} catch (SocketTimeoutException e) {
-			Log.v("web service ","Connection timeed out. Writing data to file.");
+			Log.v("Web service","connection timed out" );
 			((MyApplication) _mContext).writeToFile(params);
 		} catch (ConnectTimeoutException e) {
+			Log.v("web", ret);
 		} catch (IOException e) {
 		}
 
