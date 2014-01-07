@@ -21,6 +21,16 @@ import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
+/**
+ * @author webonise
+ *	This class is extended from Application class , the first class to be called 
+ *	when the application starts and even the last class which gets invoked when
+ *	the application is close. This class has the function to upload the error log
+ *	if the network is available and if the network is not available then give the 
+ *	error log to be stored in the file with a file name based on the time and date 
+ *	format. The error log stored in the file is uploaded from the file next time 
+ *	when it gets the network and simultaneously delete the file from the memory.
+ */
 @SuppressLint("SimpleDateFormat")
 public class MyApplication extends Application {
 
@@ -31,6 +41,9 @@ public class MyApplication extends Application {
 	private InputStreamReader inputStreamReader;
 	private BufferedReader bufferedReader;
 	
+	/**
+	 * Constructor to initialize the base UncaughtExceptionHandler object.
+	 */
 	public MyApplication() {
 		defaultUEH = Thread.getDefaultUncaughtExceptionHandler(); 
 		Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
@@ -46,8 +59,10 @@ public class MyApplication extends Application {
 		@Override
 		public void uncaughtException(Thread thread, Throwable ex) {
 			StringWriter sw = new StringWriter(); 
-			PrintWriter pw = new PrintWriter(sw);
+			PrintWriter pw = new PrintWriter(sw); 
 			ex.printStackTrace(pw);
+			
+			/*Store information about the device and the crash log in an array of string .*/
 			String[] params = new String[7];
 			params[0] = Constants.OS;
 			params[1] =	Constants.OS_VERSION ; 
@@ -57,6 +72,9 @@ public class MyApplication extends Application {
 			params[5] = sw.toString(); 
 			params[6] = Constants.API_KEY;
 
+			/*	Check if the network is available,
+			 *  if the network is available then upload the file on the server,
+			 *  if the network is not available then write the error in a file .*/
 			mNetworkDetector= new NetworkDetector(getApplicationContext()); 
 			if(mNetworkDetector.isNetworkAvailable()){
 				Log.e("network: available","uploading file");
@@ -75,7 +93,7 @@ public class MyApplication extends Application {
 		return mStringBuilder.toString();
 	}
 
-	private void writeToFile(String[] params) {  
+	public void writeToFile(String[] params) {  
 		try {
 			String strFileName=getFileName();  
 			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput(strFileName, Context.MODE_PRIVATE));
@@ -108,13 +126,13 @@ public class MyApplication extends Application {
 				inputStreamReader = new InputStreamReader(inputStream);  
 				bufferedReader= new BufferedReader(inputStreamReader); 
 				if((strFilename = bufferedReader.readLine())!= null) {
-					Constants.IS_UPLOAD_FROM_FILE=true;
+					Constants.IS_UPLOADED_FROM_FILE=true;
 					String strFileContent=getFileContent(strFilename);
 					String [] paramStrings= getStringArrayFromFileContent(strFileContent);
 					new SendLogTask(mNetworkDetector,getApplicationContext()).execute(paramStrings);
 				}
 				else {
-					Constants.IS_UPLOAD_FROM_FILE = false;
+					Constants.IS_UPLOADED_FROM_FILE = false;
 				}
 			}
 			else{
@@ -128,10 +146,14 @@ public class MyApplication extends Application {
 	
 	public void onResponseReceived() {
 		Log.e("response","upload complete");
-		if(Constants.IS_UPLOAD_FROM_FILE) { 
+		if(Constants.IS_UPLOADED_FROM_FILE) { 
 			clearFileRecord();
 		}
 		uploadCrashLogFromFile();
+	}
+	
+	public void onResponseError(){
+		
 	}
 	
 	private void clearFileRecord() {

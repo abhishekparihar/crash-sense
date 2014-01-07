@@ -36,6 +36,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.util.Log;
 
 public class WebService {
@@ -46,16 +47,20 @@ public class WebService {
 	private HttpResponse response = null;
 	private HttpPost httpPost = null;
 	private String webServiceUrl;
+	Context _mContext;
+	String [] params;
 
-	public WebService(String serviceName) {
+	public WebService(String serviceName, Context _mContext, String[] params) {
 		HttpParams myParams = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(myParams, 20000);
-		HttpConnectionParams.setSoTimeout(myParams, 20000);
+		HttpConnectionParams.setConnectionTimeout(myParams, 15000);
+		HttpConnectionParams.setSoTimeout(myParams, 15000);
 		httpClient = new DefaultHttpClient(myParams);
 		localContext = new BasicHttpContext();
 		webServiceUrl = serviceName;
 		Log.v("web",""+webServiceUrl);
-	}
+		this._mContext = _mContext;
+		this.params = params;
+	} 
 
 	public String webInvoke(String methodName, Map<String, Object> params) {
 		JSONObject jsonObject = new JSONObject();
@@ -99,25 +104,18 @@ public class WebService {
 		String postUrl = webServiceUrl;
 		httpPost = new HttpPost(postUrl);
 		Log.v("web", "" + webServiceUrl);
-		Log.v("web", "" + httpPost);
 		StringEntity se;
 		try {
 			se = new StringEntity(jsonObject.toString());
-			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-					"application/json"));
+			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,"application/json"));
 			httpPost.setEntity(se);
 			response = httpClient.execute(httpPost);
-			Log.v("web", "" + response);
 			ret = EntityUtils.toString(response.getEntity());
 			Log.v("web", ret);
-		} catch (UnsupportedEncodingException e) {
-			
-		} catch (ClientProtocolException e) {
-			
 		} catch (SocketTimeoutException e) {
-			Log.v("web", ret);
+			Log.v("web service ","Connection timeed out. Writing data to file.");
+			((MyApplication) _mContext).writeToFile(params);
 		} catch (ConnectTimeoutException e) {
-			Log.v("web", ret);
 		} catch (IOException e) {
 		}
 

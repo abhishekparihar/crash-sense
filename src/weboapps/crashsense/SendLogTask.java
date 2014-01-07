@@ -10,19 +10,18 @@ import android.util.Log;
 
 public class SendLogTask extends AsyncTask<String, String, String> {
 	String[] strParams;
-	ResponseModel mResponseModel;
 	Context _mContext;
 	NetworkDetector mNetworkDetector;
 	public SendLogTask(NetworkDetector mNetworkDetector,Context context) {
 		this.mNetworkDetector=mNetworkDetector;	
 		this._mContext=(MyApplication)context;
 	}
-
+ 
 	@Override
 	protected String doInBackground(String... params) {
-		WebService webService = new WebService("http://stage106.weboapps.com/api/v1/error_reports");
+		WebService webService = new WebService("http://stage106.weboapps.com/api/v1/error_reports",_mContext,params);
 		String response = webService.webPost(getJsonFromString(params));
-		mResponseModel = setResponseModel(response);
+		ResponseModel mResponseModel = setResponseModel(response);
 		if(mResponseModel.isStatus())
 		{
 			Log.v("result : true",mResponseModel.getMessage());
@@ -53,9 +52,10 @@ public class SendLogTask extends AsyncTask<String, String, String> {
 
 
 	private ResponseModel setResponseModel(String response) {
+		ResponseModel mResponseModel = null;
 		try {
 			JSONObject jsonObject= new JSONObject(response);
-			ResponseModel mResponseModel= new ResponseModel();
+			mResponseModel= new ResponseModel();
 			mResponseModel.setStatus(jsonObject.getBoolean("status"));
 			mResponseModel.setMessage(jsonObject.getString("message"));
 		} catch (JSONException e) {
