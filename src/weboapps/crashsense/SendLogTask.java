@@ -17,6 +17,8 @@ import android.util.Log;
  *	redirected to the application.
  */
 public class SendLogTask extends AsyncTask<String, String, String> {
+	
+	private final String TAG =getClass().getName();
 	String[] strParams;
 	Context _mContext;
 	
@@ -32,13 +34,17 @@ public class SendLogTask extends AsyncTask<String, String, String> {
 	protected String doInBackground(String... params) {
 		WebService webService = new WebService(Constants.BASE_URL+"/api/v1/error_reports",_mContext,params);
 		String response = webService.webPost(getJsonFromString(params));
-		ResponseModel mResponseModel = setResponseModel(response);
-		if(mResponseModel.isStatus())
-		{
-			Log.v("result : true",mResponseModel.getMessage());
-			((MyApplication) _mContext).onResponseReceived();
-		}else{
-			Log.v("result : false",mResponseModel.getMessage());
+		try {
+			JSONObject jsonObject= new JSONObject(response);
+			if(jsonObject.getBoolean("status"))
+			{
+				Log.i(TAG,"Response: received successfully.");
+				((MyApplication) _mContext).onResponseReceived();
+			}else{
+				Log.i(TAG,"Response: not received.");
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
 		return null;
 	}
@@ -59,30 +65,12 @@ public class SendLogTask extends AsyncTask<String, String, String> {
         	jsonError.put("error_decsription", params[5]);
             json.put("api_key", params[6]);
             json.put("error", jsonError);
-            Log.i("json in web",json.toString());
+            Log.i(TAG,"Sending prameters: parameters converted to json.");
         }catch (Exception uee) {
 		}
         return json;
 	}
 
-
-	/**
-	 * @param response json response received in a string format.
-	 * @return response model having data from response string.
-	 */
-	private ResponseModel setResponseModel(String response) {
-		ResponseModel mResponseModel = null;
-		try {
-			JSONObject jsonObject= new JSONObject(response);
-			mResponseModel= new ResponseModel();
-			mResponseModel.setStatus(jsonObject.getBoolean("status"));
-			mResponseModel.setMessage(jsonObject.getString("message"));
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return mResponseModel;
-	}
-	
 	@Override
 	protected void onPostExecute(String result) {
 		super.onPostExecute(result);

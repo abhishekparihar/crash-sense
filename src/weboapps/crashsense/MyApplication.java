@@ -34,6 +34,7 @@ import android.util.Log;
 @SuppressLint("SimpleDateFormat")
 public class MyApplication extends Application {
 
+	private final String TAG =getClass().getName();
 	private UncaughtExceptionHandler defaultUEH;
 	private String strFilename;
 	
@@ -73,10 +74,10 @@ public class MyApplication extends Application {
 			 *  if the network is not available then write the error in a file .*/
 			NetworkDetector mNetworkDetector = new NetworkDetector(getApplicationContext()); 
 			if(mNetworkDetector.isNetworkAvailable()){
-				Log.e("network: available","uploading file");
+				Log.e(TAG,"Network available: uploading crash log.");
 				new SendLogTask(getApplicationContext()).execute(params);
 			}else{ 
-				Log.e("network: unavailable","writing to file");
+				Log.e(TAG,"Network unavailable: filing crash log.");
 				writeToFile(params); 
 			}
 			defaultUEH.uncaughtException(thread, ex);
@@ -108,9 +109,9 @@ public class MyApplication extends Application {
 			outputStreamWriter.close(); 
 			outputStreamWriterFileName.write(strFileName+"\n");
 			outputStreamWriterFileName.close();
-			Log.i("File operation", "File write operation : Complete."); 
+			Log.i(TAG,"File operation: Crash logged in the file status - Complete."); 
 		} catch (IOException e) {
-			Log.i("Exception", "File write failed: " + e.toString()); 
+			Log.i(TAG,"File operation: Crash logged in the file status - Incomplete."); 
 		} 
 	}
 	
@@ -122,10 +123,10 @@ public class MyApplication extends Application {
 	private String getFileName() {
 		SimpleDateFormat sdf= new SimpleDateFormat("EEEdMMMyyyy-HH:mm:ss");  
 		Date date = new Date();
-		String strDate= sdf.format(date); 
-		strDate.trim();
-		Log.i("File Name: ",strDate);
-		return strDate;
+		String strFilename= sdf.format(date); 
+		strFilename.trim();
+		Log.i(TAG,"File Name: "+strFilename);
+		return strFilename;
 	}
 	
 	/**
@@ -160,76 +161,6 @@ public class MyApplication extends Application {
 	}
 	
 	/**
-	 * This function is called when the web service task is successful and we get
-	 * 	correct response. After the response is received it checks if the uploaded 
-	 * 	data was from the file or not. If the data was from the file then that 
-	 * 	file is deleted along with the entry in the "filename.txt" file and 
-	 * 	then function to upload the data from the is file is called once again.
-	 */
-	public void onResponseReceived() {
-		Log.e("response","upload complete");
-		if(Constants.IS_UPLOADED_FROM_FILE) { 
-			clearFileRecord();
-		}
-		uploadCrashLogFromFile();
-	}
-	
-	/**
-	 * 	This function deletes the file from the memory and also the file entry from 
-	 * 	the "filename.txt" file.
-	 */
-	private void clearFileRecord() {
-		Log.v("File record","Cleaning file record, file name is : "+strFilename);  
-		File file = new File(Constants.FILE_URL+strFilename);
-		boolean deleted = file.delete();
-		if(deleted){
-			Log.i("file deleted: ","true"); 
-			deleteFileEntryFromFilename(Constants.FILE_URL+"filename.txt", strFilename);
-		}else {
-			Log.i("file deleted: ","false");
-		}
-	}
-	
-	/**
-	 * @param file is the filename which you have to modify
-	 * @param lineToRemove is the content you want to delete.
-	 * 	This function deletes the top entry (first line) from the list of file names.
-	 */
-	public void deleteFileEntryFromFilename(String file, String lineToRemove) {
-		try {
-		  File inFile = new File(file);
-		  if (!inFile.isFile()) {
-		    Log.i("delete file entry","Parameter is not an existing file");
-		    return;
-		  }
-		  File tempFile = new File(inFile.getAbsolutePath() + ".tmp");
-		  BufferedReader br = new BufferedReader(new FileReader(file));
-		  PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
-		  String line = null;
-		  while ((line = br.readLine()) != null) {
-		    if (!line.trim().equals(lineToRemove)) {
-		      pw.println(line);
-		      pw.flush();
-		    }
-		  }
-		  pw.close();
-		  br.close();
-		  if (!inFile.delete()) {
-		    Log.i("delete file entry","Could not delete file");
-		    return;
-		  }
-		  if (!tempFile.renameTo(inFile))
-		    Log.i("delete file entry","Could not rename file");
-		}
-		catch (FileNotFoundException ex) {
-		  ex.printStackTrace();
-		}
-		catch (IOException ex) {
-		  ex.printStackTrace();
-		}
-	}
-	
-	/**
 	 * @param filename name of the file whose content you want to read.
 	 * @return string which has the content of the file.
 	 */
@@ -249,9 +180,9 @@ public class MyApplication extends Application {
 				ret = stringBuilder.toString();
 			}
 		} catch (FileNotFoundException e) {
-			Log.e("Login activity", "File not found: " + e.toString());
+			Log.e(TAG, "File operation: File not found: " + e.toString());
 		} catch (IOException e) {
-			Log.e("Login activity", "Can not read file: " + e.toString());
+			Log.e(TAG, "File operation: Could not read file: " + e.toString());
 		}
 		return ret;
 	}
@@ -264,7 +195,76 @@ public class MyApplication extends Application {
 	private String[] getStringArrayFromFileContent(String strFileContent) {
 		String [] params= new String[7];
 		params = strFileContent.split("---");
-		Log.i("api_key" ,":"+params[6]+":");
 		return params;
+	}
+	
+	/**
+	 * This function is called when the web service task is successful and we get
+	 * 	correct response. After the response is received it checks if the uploaded 
+	 * 	data was from the file or not. If the data was from the file then that 
+	 * 	file is deleted along with the entry in the "filename.txt" file and 
+	 * 	then function to upload the data from the is file is called once again.
+	 */
+	public void onResponseReceived() {
+		Log.e(TAG,"Upload status: Complete");
+		if(Constants.IS_UPLOADED_FROM_FILE) { 
+			clearFileRecord();
+		}
+		uploadCrashLogFromFile();
+	}
+	
+	/**
+	 * 	This function deletes the file from the memory and also the file entry from 
+	 * 	the "filename.txt" file.
+	 */
+	private void clearFileRecord() {
+		Log.v(TAG,"File operation: Cleaning file record. File name is : "+strFilename);  
+		File file = new File(Constants.FILE_URL+strFilename);
+		boolean deleted = file.delete();
+		if(deleted){
+			Log.i(TAG,"File operation: File deleted successfully"); 
+			deleteFileEntryFromFilename(Constants.FILE_URL+"filename.txt", strFilename);
+		}else {
+			Log.i(TAG,"File operation: File was not deleted successfully"); 
+		}
+	}
+	
+	/**
+	 * @param file is the filename which you have to modify
+	 * @param lineToRemove is the content you want to delete.
+	 * 	This function deletes the top entry (first line) from the list of file names.
+	 */
+	public void deleteFileEntryFromFilename(String file, String lineToRemove) {
+		try {
+		  File inFile = new File(file);
+		  if (!inFile.isFile()) {
+		    Log.i(TAG,"File operation: there is no such file as : "+file);
+		    return;
+		  }
+		  File tempFile = new File(inFile.getAbsolutePath() + ".tmp");
+		  BufferedReader br = new BufferedReader(new FileReader(file));
+		  PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
+		  String line = null;
+		  while ((line = br.readLine()) != null) {
+		    if (!line.trim().equals(lineToRemove)) {
+		      pw.println(line);
+		      pw.flush();
+		    }
+		  }
+		  pw.close();
+		  br.close();
+		  if (!inFile.delete()) {
+			Log.i(TAG,"File operation: could not delete the file");
+		    return;
+		  }
+		  if (!tempFile.renameTo(inFile))
+			Log.i(TAG,"File operation: could not rename the file");
+		}
+		catch (FileNotFoundException ex) {
+		  ex.printStackTrace();
+		}
+		catch (IOException ex) {
+		  ex.printStackTrace();
+		}
 	}
 }

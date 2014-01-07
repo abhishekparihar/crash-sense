@@ -41,6 +41,7 @@ import android.util.Log;
 
 public class WebService {
 	
+	private final String TAG =getClass().getName();
 	private DefaultHttpClient httpClient;
 	private HttpContext localContext;
 	private String ret;
@@ -57,7 +58,7 @@ public class WebService {
 		httpClient = new DefaultHttpClient(myParams);
 		localContext = new BasicHttpContext();
 		webServiceUrl = serviceName;
-		Log.v("web",""+webServiceUrl);
+		Log.i(TAG,"Web service url: "+webServiceUrl);
 		this._mContext = _mContext;
 		this.params = params;
 	} 
@@ -103,27 +104,27 @@ public class WebService {
 	public String webPost(JSONObject jsonObject) {
 		String postUrl = webServiceUrl;
 		httpPost = new HttpPost(postUrl);
-		Log.v("web", "" + webServiceUrl);
-		Log.v("web", "" + httpPost);
 		StringEntity se;
 		try {
 			se = new StringEntity(jsonObject.toString());
-			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-					"application/json"));
+			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,"application/json"));
 			httpPost.setEntity(se);
 			response = httpClient.execute(httpPost);
-			Log.v("web", "" + response);
 			ret = EntityUtils.toString(response.getEntity());
-			Log.v("web", ret);
+			Log.i(TAG, "Response received is: " + ret);
 		} catch (UnsupportedEncodingException e) {
 			
 		} catch (ClientProtocolException e) {
 			
 		} catch (SocketTimeoutException e) {
-			Log.v("Web service","connection timed out" );
+			
+			/*In case if the connection is slow then and connection time out occurs
+			then you need to wirte the data in the file .*/
+			
+			Log.i(TAG,"Connection problem: Connection timed out" );
 			((MyApplication) _mContext).writeToFile(params);
 		} catch (ConnectTimeoutException e) {
-			Log.v("web", ret);
+			Log.i(TAG,"Connection problem: Connection timed out" );
 		} catch (IOException e) {
 		}
 
