@@ -35,7 +35,7 @@ Project 106
 <br/>
 	**Your code will look like this . (AndroidManifest.xml)**<br/>
 <br/>
-<application
+		<application
         android:name=".DemoApplication"
         android:allowBackup="true"
         ...
