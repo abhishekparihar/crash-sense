@@ -35,15 +35,15 @@ Project 106
 <br/>
 	**Your code will look like this . (AndroidManifest.xml)**<br/>
 <br/>
-<application
-        android:name=".DemoApplication"
-        android:allowBackup="true"
-        ...
-        android:theme="@style/AppTheme" >
-        <activity
-          …...
-        </activity>
-    </application>
+		<application
+			android:name=".DemoApplication"
+			android:allowBackup="true"
+			...
+			android:theme="@style/AppTheme" >
+			<activity
+				…...
+			</activity>
+		</application>
 
 
 
