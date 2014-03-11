@@ -36,6 +36,7 @@ Project 106
 	**Your code will look like this . (AndroidManifest.xml)**<br/>
 <br/>
 		<application
+<<<<<<< HEAD
 			android:name=".DemoApplication"
 			android:allowBackup="true"
 			...
@@ -44,6 +45,16 @@ Project 106
 				…...
 			</activity>
 		</application>
+=======
+        android:name=".DemoApplication"
+        android:allowBackup="true"
+        ...
+        android:theme="@style/AppTheme" >
+        <activity
+          …...
+        </activity>
+    </application>
+>>>>>>> bf9d87581e323eaf8da26f82f26daaecef6f639d
 
 
 
